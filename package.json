@@ -1,0 +1,12 @@
+{
+  "name": "node-skiplist",
+  "version": "0.0.1",
+  "dependencies": {
+    "coffee-script": "~1.7.1",
+    "mocha": "^1.21.4"
+  },
+  "main": "skip_list.js",
+  "scripts": {
+    "test": "find . -name \"*tests.js\" -print0 | xargs -0 ./node_modules/.bin/mocha --reporter spec"
+  }
+}
