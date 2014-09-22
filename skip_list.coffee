@@ -19,9 +19,10 @@ class SkipList
   insert: (element) ->
     find_result = @find element
     left_node = find_result.element
-    comparison = element.compare left_node.element
-    if comparison == 0
-      throw Error("Element already present")
+    if left_node.element
+      comparison = element.compare left_node.element
+      if comparison == 0
+        throw Error("Element already present")
 
     new_node = new SkipNode()
     new_node.element = element
@@ -98,6 +99,14 @@ class SkipList
         index += previous.right_edge.distance
         previous = current
         current = previous.next()
+
+  to_list: () ->
+    element_list = []
+    current = @heads[0].next()
+    while current
+      element_list.push current
+      current = current.next()
+    return element_list
 
 module.exports =
   SkipList: SkipList

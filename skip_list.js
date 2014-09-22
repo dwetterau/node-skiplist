@@ -23,9 +23,11 @@
       var comparison, current, current_head, current_index, find_result, left_distance, left_index, left_node, new_index, new_node, newer_node, old_distance, previous, right_distance, right_edge, right_node, _results;
       find_result = this.find(element);
       left_node = find_result.element;
-      comparison = element.compare(left_node.element);
-      if (comparison === 0) {
-        throw Error("Element already present");
+      if (left_node.element) {
+        comparison = element.compare(left_node.element);
+        if (comparison === 0) {
+          throw Error("Element already present");
+        }
       }
       new_node = new SkipNode();
       new_node.element = element;
@@ -109,6 +111,17 @@
           current = previous.next();
         }
       }
+    };
+
+    SkipList.prototype.to_list = function() {
+      var current, element_list;
+      element_list = [];
+      current = this.heads[0].next();
+      while (current) {
+        element_list.push(current);
+        current = current.next();
+      }
+      return element_list;
     };
 
     return SkipList;
