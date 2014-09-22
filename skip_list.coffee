@@ -9,7 +9,7 @@ class SkipList
   _new_head: () ->
     new_head = new SkipNode()
     new_edge = new SkipEdge(0)
-    new_head.set_next(null, new_edge, 0)
+    new_head.set_next(null, new_edge, 1)
     if @heads.length
       new_head.down = @heads[@heads.length - 1]
     @heads.push new_head
@@ -30,13 +30,12 @@ class SkipList
 
     # Insert the element on the base level
     right_node = left_node.next()
-    before_edge_length = if find_result.index == -1 then 0 else 1
-    left_node.set_next(new_node, left_node.right_edge, before_edge_length)
+    left_node.set_next(new_node, left_node.right_edge, 1)
     right_edge = new SkipEdge(1)
     if right_node
       new_node.set_next(right_node, right_edge, 1)
     else
-      new_node.set_next(null, right_edge, 0)
+      new_node.set_next(null, right_edge, 1)
 
     # Use the magic factor 0.5
     current_head = 1
@@ -45,7 +44,7 @@ class SkipList
         @_new_head()
       previous = @heads[current_head]
       current = previous.next()
-      current_index = -1
+      current_index = previous.right_edge.distance - 1
       while current and current_index < find_result.index
         current_index += previous.right_edge.distance
         previous = current
@@ -58,9 +57,9 @@ class SkipList
       # previous is guaranteed to be nonnull and have a nonnull next edge
       # Calculate all of the new distances
       old_distance = previous.right_edge.distance
-      left_index = if current_index == -1 then -1 else current_index - previous.right_edge.distance
+      left_index = current_index - previous.right_edge.distance
       new_index = find_result.index
-      left_distance = new_index - left_index
+      left_distance = new_index - left_index + 1
       previous.set_next(newer_node, previous.right_edge, left_distance)
       if current
         right_distance = old_distance - left_distance + 1
@@ -68,7 +67,7 @@ class SkipList
         newer_node.set_next(current, right_edge, right_distance)
       else
         right_edge = new SkipEdge(1)
-        newer_node.set_next(null, right_edge, 0)
+        newer_node.set_next(null, right_edge, 1)
 
       # Set the new node to the one at the last level before adding another
       new_node = newer_node
@@ -83,6 +82,13 @@ class SkipList
         current = previous.next()
       previous.set_next(current, previous.right_edge, previous.right_edge.distance + 1)
       current_head += 1
+
+  find: (element) ->
+    # Return the index of the given element or -1 if it isn't present
+    result = @_find element
+    if result.node.element.compare(element) != 0
+      return -1
+    return result.index
 
   # Traverses the skip list to find this element or the place it would be
   _find: (element) ->
@@ -101,6 +107,7 @@ class SkipList
           return {'node': previous, 'index': index}
       comparison = current.element.compare(element)
       if comparison == 0
+        index += previous.right_edge.distance
         # We found the element, go all the way down first
         while current.down
           current = current.down

@@ -10,7 +10,7 @@
 
   describe('list_tests', function() {
     describe('test find', function() {});
-    return describe('test insert', function() {
+    describe('test insert', function() {
       it('should handle inserting a single element', function() {
         var element, list, skip_list;
         element = new Element(1);
@@ -27,7 +27,6 @@
         for (i = _i = 10; _i >= 1; i = --_i) {
           elements.unshift(new Element(i));
           skip_list.insert(elements[0]);
-          skip_list.visualize();
         }
         list = skip_list.to_list();
         assert.equal(list.length, elements.length);
@@ -35,6 +34,43 @@
         for (index = _j = 0, _len = elements.length; _j < _len; index = ++_j) {
           element = elements[index];
           _results.push(assert.equal(list[index].element.compare(element), 0));
+        }
+        return _results;
+      });
+    });
+    return describe('test find', function() {
+      it('should return -1 for elements not in the list', function() {
+        var i, result, skip_list, _i, _j, _results;
+        skip_list = new SkipList();
+        for (i = _i = 10; _i >= 0; i = --_i) {
+          if (i % 2 === 0) {
+            skip_list.insert(new Element(i));
+          }
+        }
+        _results = [];
+        for (i = _j = 10; _j >= 0; i = --_j) {
+          if (i % 2 !== 0) {
+            result = skip_list.find(new Element(i));
+            _results.push(assert.equal(result, -1));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      });
+      return it('should find elements by index correctly', function() {
+        var element, elements, i, index, skip_list, _i, _j, _results;
+        elements = [];
+        skip_list = new SkipList();
+        for (i = _i = 10; _i >= 0; i = --_i) {
+          elements.unshift(new Element(i));
+          skip_list.insert(elements[0]);
+        }
+        _results = [];
+        for (i = _j = 0; _j <= 10; i = ++_j) {
+          element = elements[i];
+          index = skip_list.find(element);
+          _results.push(assert.equal(index, i));
         }
         return _results;
       });
