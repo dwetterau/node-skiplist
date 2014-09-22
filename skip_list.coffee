@@ -58,17 +58,12 @@ class SkipList
       # previous is guaranteed to be nonnull and have a nonnull next edge
       # Calculate all of the new distances
       old_distance = previous.right_edge.distance
-      left_index = current_index - previous.right_edge.distance
-      new_index = find_result.index + 1
+      left_index = if current_index == -1 then -1 else current_index - previous.right_edge.distance
+      new_index = find_result.index
       left_distance = new_index - left_index
       previous.set_next(newer_node, previous.right_edge, left_distance)
-      console.log "old distance", old_distance
-      console.log "left_index", left_index
-      console.log "new_index", new_index
-      console.log "left_distance", left_distance
       if current
         right_distance = old_distance - left_distance + 1
-        console.log "right_distance level=" + current_head, right_distance
         right_edge = new SkipEdge(right_distance)
         newer_node.set_next(current, right_edge, right_distance)
       else
