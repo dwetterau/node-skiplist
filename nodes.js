@@ -5,10 +5,20 @@
   SkipNode = (function() {
     function SkipNode() {
       this.right_edge = null;
-      this.left_edge = null;
       this.down = null;
       this.element = null;
     }
+
+    SkipNode.prototype.next = function() {
+      return this.right_edge && this.right_edge.right_node;
+    };
+
+    SkipNode.prototype.set_next = function(node, edge, distance) {
+      edge.distance = distance;
+      edge.left_node = this;
+      edge.right_node = node;
+      return this.right_edge = edge;
+    };
 
     return SkipNode;
 

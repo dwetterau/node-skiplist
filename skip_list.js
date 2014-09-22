@@ -6,16 +6,110 @@
 
   SkipList = (function() {
     function SkipList() {
-      var first_edge, first_head;
       this.heads = [];
-      first_head = new SkipNode();
-      first_edge = new SkipEdge(0);
-      first_edge.left_node = first_head;
-      first_head.right_edge = first_edge;
-      this.heads.push(first_head);
+      this._new_head();
     }
 
-    SkipList.prototype.insert = function(element) {};
+    SkipList.prototype._new_head = function() {
+      var new_edge, new_head;
+      new_head = new SkipNode();
+      new_edge = new SkipEdge(0);
+      new_edge.left_node = new_head;
+      new_head.set_next(null, new_edge, 0);
+      return this.heads.push(new_head);
+    };
+
+    SkipList.prototype.insert = function(element) {
+      var comparison, current, current_head, current_index, find_result, left_distance, left_index, left_node, new_index, new_node, newer_node, old_distance, previous, right_distance, right_edge, right_node, _results;
+      find_result = this.find(element);
+      left_node = find_result.element;
+      comparison = element.compare(left_node.element);
+      if (comparison === 0) {
+        throw Error("Element already present");
+      }
+      new_node = new SkipNode();
+      new_node.element = element;
+      right_node = left_node.next();
+      left_node.set_next(new_node, left_node.right_edge, 1);
+      if (right_node) {
+        right_edge = new SkipEdge(1);
+        new_node.set_next(right_node, right_edge, 1);
+      }
+      current_head = 0;
+      _results = [];
+      while (Math.random() < 0.5) {
+        current_head += 1;
+        if (current_head >= this.heads.length) {
+          this._new_head();
+        }
+        previous = this.heads[current_head];
+        current = previous.next();
+        current_index = 0;
+        while (current && current_index < find_result.index) {
+          current_index += previous.right_edge.distance;
+          previous = current;
+          current = previous.next();
+        }
+        newer_node = new SkipNode();
+        newer_node.element = element;
+        newer_node.down = new_node;
+        old_distance = previous.right_edge.distance;
+        left_index = current_index - old_distance;
+        new_index = find_result.index + 1;
+        left_distance = new_index - left_index;
+        previous.set_next(newer_node, previous.right_edge, left_distance);
+        if (current) {
+          right_distance = old_distance - left_distance + 1;
+          right_edge = new SkipEdge(right_distance);
+          newer_node.set_next(current, right_edge, right_distance);
+        }
+        _results.push(new_node = newer_node);
+      }
+      return _results;
+    };
+
+    SkipList.prototype.find = function(element) {
+      var comparison, current, index, previous;
+      previous = this.heads[this.heads.length - 1];
+      current = previous.next();
+      index = 0;
+      while (true) {
+        if (!current) {
+          if (previous.down) {
+            previous = previous.down;
+            current = previous.next();
+            continue;
+          } else {
+            return {
+              'element': previous,
+              'index': index
+            };
+          }
+        }
+        comparison = current.element.compare(element);
+        if (comparison === 0) {
+          return {
+            'element': current,
+            'index': index
+          };
+        } else if (comparison > 0) {
+          if (previous.down) {
+            previous = previous.down;
+            current = previous.next();
+            continue;
+          } else {
+            return {
+              'element': previous,
+              'index': index
+            };
+          }
+        } else {
+          index += previous.right_edge.distance;
+          previous = current;
+          current = previous.next();
+        }
+      }
+    };
 
     return SkipList;
 
