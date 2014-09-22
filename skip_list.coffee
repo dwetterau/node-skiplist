@@ -18,6 +18,8 @@ class SkipList
   # other element, == 0 if it the same or > 0 if it is larger (similar to Java's compareTo).
   insert: (element) ->
     find_result = @find element
+    console.log find_result
+
     left_node = find_result.element
     if left_node.element
       comparison = element.compare left_node.element

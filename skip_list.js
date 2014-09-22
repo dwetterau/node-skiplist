@@ -22,6 +22,7 @@
     SkipList.prototype.insert = function(element) {
       var comparison, current, current_head, current_index, find_result, left_distance, left_index, left_node, new_index, new_node, newer_node, old_distance, previous, right_distance, right_edge, right_node, _results;
       find_result = this.find(element);
+      console.log(find_result);
       left_node = find_result.element;
       if (left_node.element) {
         comparison = element.compare(left_node.element);
