@@ -17,10 +17,8 @@ class SkipList
   # by calling the .compare() method on the element and expecting < 0 if it is smaller than the
   # other element, == 0 if it the same or > 0 if it is larger (similar to Java's compareTo).
   insert: (element) ->
-    find_result = @find element
-    console.log find_result
-
-    left_node = find_result.element
+    find_result = @_find element
+    left_node = find_result.node
     if left_node.element
       comparison = element.compare left_node.element
       if comparison == 0
@@ -69,7 +67,7 @@ class SkipList
       new_node = newer_node
 
   # Traverses the skip list to find this element or the place it would be
-  find: (element) ->
+  _find: (element) ->
     previous = @heads[@heads.length - 1]
     current = previous.next()
     index = 0
@@ -82,11 +80,11 @@ class SkipList
           continue
         else
           # We are at the bottom and at the end of the list
-          return {'element': previous, 'index': index}
+          return {'node': previous, 'index': index}
       comparison = current.element.compare(element)
       if comparison == 0
         # We found the element
-        return {'element': current, 'index': index}
+        return {'node': current, 'index': index}
       else if comparison > 0
         # We are pointing at a larger element, go back.
         if previous.down
@@ -95,7 +93,7 @@ class SkipList
           continue
         else
           # We didn't find the element, return previous (right before where it would be)
-          return {'element': previous, 'index': index}
+          return {'node': previous, 'index': index}
       else
         # We are pointing at a smaller element, keep going at this level
         index += previous.right_edge.distance
@@ -109,6 +107,21 @@ class SkipList
       element_list.push current
       current = current.next()
     return element_list
+
+  visualize: () ->
+    console.log "################~BEGIN~##############"
+    for head, index in @heads
+      current = head.next()
+      row = index + '='
+      while current
+        row += '(' + current.element.value + ')'
+        if current.down
+          row += 'd'
+        if current.right_edge
+          row += '-' + current.right_edge.distance + '-'
+        current = current.next()
+      console.log row
+    console.log "################~END~##############"
 
 module.exports =
   SkipList: SkipList

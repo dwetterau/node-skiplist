@@ -21,9 +21,8 @@
 
     SkipList.prototype.insert = function(element) {
       var comparison, current, current_head, current_index, find_result, left_distance, left_index, left_node, new_index, new_node, newer_node, old_distance, previous, right_distance, right_edge, right_node, _results;
-      find_result = this.find(element);
-      console.log(find_result);
-      left_node = find_result.element;
+      find_result = this._find(element);
+      left_node = find_result.node;
       if (left_node.element) {
         comparison = element.compare(left_node.element);
         if (comparison === 0) {
@@ -71,7 +70,7 @@
       return _results;
     };
 
-    SkipList.prototype.find = function(element) {
+    SkipList.prototype._find = function(element) {
       var comparison, current, index, previous;
       previous = this.heads[this.heads.length - 1];
       current = previous.next();
@@ -84,7 +83,7 @@
             continue;
           } else {
             return {
-              'element': previous,
+              'node': previous,
               'index': index
             };
           }
@@ -92,7 +91,7 @@
         comparison = current.element.compare(element);
         if (comparison === 0) {
           return {
-            'element': current,
+            'node': current,
             'index': index
           };
         } else if (comparison > 0) {
@@ -102,7 +101,7 @@
             continue;
           } else {
             return {
-              'element': previous,
+              'node': previous,
               'index': index
             };
           }
@@ -123,6 +122,29 @@
         current = current.next();
       }
       return element_list;
+    };
+
+    SkipList.prototype.visualize = function() {
+      var current, head, index, row, _i, _len, _ref1;
+      console.log("################~BEGIN~##############");
+      _ref1 = this.heads;
+      for (index = _i = 0, _len = _ref1.length; _i < _len; index = ++_i) {
+        head = _ref1[index];
+        current = head.next();
+        row = index + '=';
+        while (current) {
+          row += '(' + current.element.value + ')';
+          if (current.down) {
+            row += 'd';
+          }
+          if (current.right_edge) {
+            row += '-' + current.right_edge.distance + '-';
+          }
+          current = current.next();
+        }
+        console.log(row);
+      }
+      return console.log("################~END~##############");
     };
 
     return SkipList;

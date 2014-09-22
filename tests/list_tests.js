@@ -27,6 +27,7 @@
         for (i = _i = 10; _i >= 1; i = --_i) {
           elements.unshift(new Element(i));
           skip_list.insert(elements[0]);
+          skip_list.visualize();
         }
         list = skip_list.to_list();
         assert.equal(list.length, elements.length);

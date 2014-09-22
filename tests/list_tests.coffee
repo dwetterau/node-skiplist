@@ -22,6 +22,7 @@ describe 'list_tests', () ->
       for i in [10..1]
         elements.unshift(new Element(i))
         skip_list.insert(elements[0])
+        skip_list.visualize()
 
       list = skip_list.to_list()
       assert.equal list.length, elements.length
