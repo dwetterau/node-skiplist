@@ -3,16 +3,21 @@
 class SkipList
   constructor: () ->
     # TODO: Allow it to be constructed on a sorted list
-    @heads = []
+    @_heads = []
     @_new_head()
+    @_size = 0
 
   _new_head: () ->
     new_head = new SkipNode()
     new_edge = new SkipEdge(0)
     new_head.set_next(null, new_edge, 1)
-    if @heads.length
-      new_head.down = @heads[@heads.length - 1]
-    @heads.push new_head
+    if @_heads.length
+      new_head.down = @_heads[@_heads.length - 1]
+    @_heads.push new_head
+
+  # Return the current size of the list
+  size: () ->
+    return @_size
 
   # Inserts an element into the skip list in the proper sorted position. This position is determined
   # by calling the .compare() method on the element and expecting < 0 if it is smaller than the
@@ -25,6 +30,8 @@ class SkipList
       if comparison == 0
         throw Error("Element already present")
 
+    # We are going to insert an element, increment the size
+    @_size += 1
     new_node = new SkipNode()
     new_node.element = element
 
@@ -40,9 +47,9 @@ class SkipList
     # Use the magic factor 0.5
     current_head = 1
     while Math.random() < 0.5
-      if current_head == @heads.length
+      if current_head == @_heads.length
         @_new_head()
-      previous = @heads[current_head]
+      previous = @_heads[current_head]
       current = previous.next()
       current_index = previous.right_edge.distance - 1
       while current and current_index < find_result.index
@@ -74,8 +81,8 @@ class SkipList
       current_head += 1
 
     # Increment the distance of all the higher level edges
-    while current_head < @heads.length
-      previous = @heads[current_head]
+    while current_head < @_heads.length
+      previous = @_heads[current_head]
       current = previous.next()
       while current and current.element.compare(element) < 0
         previous = current
@@ -83,16 +90,34 @@ class SkipList
       previous.set_next(current, previous.right_edge, previous.right_edge.distance + 1)
       current_head += 1
 
+  # Return the index of the given element or -1 if it isn't present
   find: (element) ->
-    # Return the index of the given element or -1 if it isn't present
     result = @_find element
     if result.node.element.compare(element) != 0
       return -1
     return result.index
 
+  # Return the element at the given index or null if it is out of range
+  rank: (index) ->
+    # Check if the index is out of range
+    if index < 0 or index >= @_size
+      return null
+
+    search = (node, num_left) ->
+      if num_left == 0
+        return node.element
+      if node.right_edge.distance <= num_left and node.next()
+        return search(node.next(), num_left - node.right_edge.distance)
+      else
+        return search(node.down, num_left)
+
+    num_left = index + 1
+    first = @_heads[@_heads.length - 1]
+    return search(first, num_left)
+
   # Traverses the skip list to find this element or the place it would be
   _find: (element) ->
-    previous = @heads[@heads.length - 1]
+    previous = @_heads[@_heads.length - 1]
     current = previous.next()
     index = -1
     while true
@@ -129,7 +154,7 @@ class SkipList
 
   to_list: () ->
     element_list = []
-    current = @heads[0].next()
+    current = @_heads[0].next()
     while current
       element_list.push current
       current = current.next()
@@ -137,7 +162,7 @@ class SkipList
 
   visualize: () ->
     console.log "################~BEGIN~##############"
-    for head, index in @heads
+    for head, index in @_heads
       current = head.next()
       row = index + '=' + head.right_edge.distance + '='
       while current
