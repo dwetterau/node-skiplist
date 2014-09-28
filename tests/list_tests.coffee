@@ -4,7 +4,30 @@ assert = require 'assert'
 
 describe 'list_tests', () ->
 
-  describe 'test find', () ->
+  # Go through each row, make sure they are in order and the distances add up.
+  verify_list = (skip_list) ->
+    # Start by calling to_list to build a mapping of element to index
+    list = skip_list.to_list()
+    element_to_index = {}
+    for node, index in list
+      element_to_index[node.element.value] = index
+
+    for head in skip_list._heads
+      previous = head
+      current = previous.next()
+      index = previous.right_edge.distance - 1
+      last = previous.element
+      while current
+        # Make sure the index is right
+        assert.equal index, element_to_index[current.element.value]
+
+        # Make sure this is sorted
+        if last
+          assert current.element.compare(last) > 0
+        last = current.element
+        previous = current
+        current = previous.next()
+        index += previous.right_edge.distance
 
   describe 'test insert', () ->
     it 'should handle inserting a single element', () ->
@@ -16,6 +39,7 @@ describe 'list_tests', () ->
       assert.equal list.length, 1
       assert.equal list.length, skip_list.size()
       assert.equal list[0].element.compare(element), 0
+      verify_list(skip_list)
 
     it 'should handle inserting elements and return them in sorted order', () ->
       elements = []
@@ -23,6 +47,21 @@ describe 'list_tests', () ->
       for i in [10..1]
         elements.unshift(new Element(i))
         skip_list.insert(elements[0])
+        verify_list(skip_list)
+
+      list = skip_list.to_list()
+      assert.equal list.length, elements.length
+      assert.equal skip_list.size(), elements.length
+      for element, index in elements
+        assert.equal list[index].element.compare(element), 0
+
+    it 'should handle inserting elements in order as well', () ->
+      elements = []
+      skip_list = new SkipList()
+      for i in [0..10]
+        elements.push(new Element(i))
+        skip_list.insert(elements[i])
+        verify_list(skip_list)
 
       list = skip_list.to_list()
       assert.equal list.length, elements.length
@@ -76,7 +115,114 @@ describe 'list_tests', () ->
       elements = []
       for i in [10..0]
         elements.unshift(new Element(i))
-        skip_list.insert(new Element(i))
+        skip_list.insert(elements[0])
 
       for element, index in elements
         assert.equal skip_list.rank(index).compare(element), 0
+
+    it 'should return the proper frontier from the helper method', () ->
+      skip_list = new SkipList()
+      elements = []
+      for i in [10..0]
+        elements.unshift(new Element(i))
+        skip_list.insert(elements[0])
+
+      # Rank of -1 should return the stack of heads
+      {element, frontier} = skip_list._rank(-1)
+      assert.equal element, null
+      assert.equal frontier.length, skip_list._heads.length
+
+      # The last element of the frontier should point to the right index node
+      for i in [0..10]
+        {element, frontier} = skip_list._rank(i)
+        assert.equal element, elements[i]
+        assert.equal frontier[frontier.length - 1].element, elements[i]
+
+  describe 'test remove', () ->
+    it 'should fail to remove elements outside of the bounds', () ->
+      skip_list = new SkipList()
+      elements = []
+      for i in [10..0]
+        elements.unshift(new Element(i))
+        skip_list.insert(elements[0])
+
+      assert not skip_list.remove(-1)
+      assert.equal skip_list.size(), elements.length
+
+      assert not skip_list.remove(skip_list.size()), elements.length
+      assert.equal skip_list.size(), elements.length
+
+    it 'should successfully remove elements at random and decrement the counter', () ->
+      skip_list = new SkipList()
+      elements = []
+      for i in [10..0]
+        elements.unshift(new Element(i))
+        skip_list.insert(elements[0])
+
+      for i in [10..0]
+        remove_index = Math.floor(Math.random() * i)
+
+        assert skip_list.remove(remove_index)
+        assert.equal skip_list.size(), i
+        verify_list(skip_list)
+
+    it 'should successfully remove the first element and decrement the counter', () ->
+      skip_list = new SkipList()
+      elements = []
+      for i in [10..0]
+        elements.unshift(new Element(i))
+        skip_list.insert(elements[0])
+
+      for i in [10..0]
+        remove_index = 0
+
+        assert skip_list.remove(remove_index)
+        assert.equal skip_list.size(), i
+        verify_list(skip_list)
+
+    it 'should successfully remove the last element and decrement the counter', () ->
+      skip_list = new SkipList()
+      elements = []
+      for i in [10..0]
+        elements.unshift(new Element(i))
+        skip_list.insert(elements[0])
+
+      for i in [10..0]
+        remove_index = skip_list.size() - 1
+
+        assert skip_list.remove(remove_index)
+        assert.equal skip_list.size(), i
+        verify_list(skip_list)
+
+    it 'should successfully remove the middle element and decrement the counter', () ->
+      skip_list = new SkipList()
+      elements = []
+      for i in [10..0]
+        elements.unshift(new Element(i))
+        skip_list.insert(elements[0])
+
+      for i in [10..0]
+        remove_index = Math.floor(i / 2)
+
+        assert skip_list.remove(remove_index)
+        assert.equal skip_list.size(), i
+        verify_list(skip_list)
+
+    it 'should be able to insert after removing elements', () ->
+      skip_list = new SkipList()
+      elements = []
+      for i in [10..0]
+        elements.unshift(new Element(i))
+        skip_list.insert(elements[0])
+
+      for i in [10..0]
+        remove_index = Math.floor(i / 2)
+
+        assert skip_list.remove(remove_index)
+        assert.equal skip_list.size(), i
+        verify_list(skip_list)
+
+      for i in [0..10]
+        skip_list.insert(elements[i])
+        assert.equal skip_list.size(), i + 1
+        verify_list(skip_list)

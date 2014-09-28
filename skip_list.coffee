@@ -52,10 +52,10 @@ class SkipList
       previous = @_heads[current_head]
       current = previous.next()
       current_index = previous.right_edge.distance - 1
-      while current and current_index < find_result.index
-        current_index += previous.right_edge.distance
+      while current and current.element.compare(element) < 0
         previous = current
         current = previous.next()
+        current_index += previous.right_edge.distance
       # Now we insert a new node between previous and current
       newer_node = new SkipNode()
       newer_node.element = element
@@ -87,7 +87,8 @@ class SkipList
       while current and current.element.compare(element) < 0
         previous = current
         current = previous.next()
-      previous.set_next(current, previous.right_edge, previous.right_edge.distance + 1)
+      if previous.right_edge.right_node
+        previous.set_next(current, previous.right_edge, previous.right_edge.distance + 1)
       current_head += 1
 
   # Return the index of the given element or -1 if it isn't present
@@ -103,17 +104,73 @@ class SkipList
     if index < 0 or index >= @_size
       return null
 
+    result = @_rank(index)
+    return result.element;
+
+  # Remove the element at the specified index
+  remove: (index) ->
+    if index < 0 or index >= @_size
+      return false
+
+    # Get the frontier of nodes to the left of the target to remove
+    {element, frontier} = @_rank(index - 1)
+    target_element = frontier[frontier.length - 1].next().element
+
+    for node in frontier
+      # If the next node is null, we are at the end of the list, nothing to do here.
+      if not node.next()
+        continue
+
+      # Determine if the next node is the node we are deleting
+      if index == 0
+        next_past_target = node.right_edge.distance > 1
+      else if target_element
+        next_past_target = node.next().element.compare(target_element) > 0
+      else
+        next_past_target = false
+      # If the next node from this one is past the target, just subtract from distance
+      if next_past_target
+        node.right_edge.distance -= 1
+      else
+        # If we are removing the node to the right, set this right pointer across and subtract one from the
+        # total distance.
+        far_edge = node.next().right_edge
+        if not node.element and not far_edge.right_node
+          # We are removing the first node after a head, if it doesn't have a next, remove the head
+          @_heads.pop()
+        else
+          distance = if not far_edge.right_node then 1 else far_edge.distance + node.right_edge.distance - 1
+          node.set_next(far_edge.right_node, node.right_edge, distance)
+
+    # We have removed a node, subtract from the size
+    @_size -= 1
+
+    # If removing this element caused the size of the list to be zero, push on a new head.
+    if @_size == 0
+      @_new_head()
+    return true
+
+  # Look for the element at this index, keep track of the nodes on each level that are on the frontier
+  _rank: (index) ->
+    frontier = []
+
     search = (node, num_left) ->
       if num_left == 0
-        return node.element
+        frontier.push(node)
+        if node.down
+          return search(node.down, 0)
+        else
+          return node.element
       if node.right_edge.distance <= num_left and node.next()
         return search(node.next(), num_left - node.right_edge.distance)
       else
+        frontier.push(node)
         return search(node.down, num_left)
 
     num_left = index + 1
     first = @_heads[@_heads.length - 1]
-    return search(first, num_left)
+    element = search(first, num_left)
+    return {element, frontier}
 
   # Traverses the skip list to find this element or the place it would be
   _find: (element) ->
