@@ -238,12 +238,17 @@
     };
 
     SkipList.prototype.to_list = function() {
-      var node, _i, _len, _ref1;
-      _ref1 = this._to_list();
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        node = _ref1[_i];
-        return node.element;
-      }
+      var node;
+      return (function() {
+        var _i, _len, _ref1, _results;
+        _ref1 = this._to_list();
+        _results = [];
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          node = _ref1[_i];
+          _results.push(node.element);
+        }
+        return _results;
+      }).call(this);
     };
 
     SkipList.prototype.visualize = function() {

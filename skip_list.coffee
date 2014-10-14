@@ -218,7 +218,7 @@ class SkipList
     return element_list
 
   to_list: () ->
-    return node.element for node in @_to_list()
+    return (node.element for node in @_to_list())
 
   visualize: () ->
     console.log "################~BEGIN~##############"
