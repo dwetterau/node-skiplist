@@ -7,7 +7,7 @@ describe 'list_tests', () ->
   # Go through each row, make sure they are in order and the distances add up.
   verify_list = (skip_list) ->
     # Start by calling to_list to build a mapping of element to index
-    list = skip_list.to_list()
+    list = skip_list._to_list()
     element_to_index = {}
     for node, index in list
       element_to_index[node.element.value] = index
@@ -35,7 +35,7 @@ describe 'list_tests', () ->
       skip_list = new SkipList()
       skip_list.insert(element)
 
-      list = skip_list.to_list()
+      list = skip_list._to_list()
       assert.equal list.length, 1
       assert.equal list.length, skip_list.size()
       assert.equal list[0].element.compare(element), 0
@@ -49,7 +49,7 @@ describe 'list_tests', () ->
         skip_list.insert(elements[0])
         verify_list(skip_list)
 
-      list = skip_list.to_list()
+      list = skip_list._to_list()
       assert.equal list.length, elements.length
       assert.equal skip_list.size(), elements.length
       for element, index in elements
@@ -63,7 +63,7 @@ describe 'list_tests', () ->
         skip_list.insert(elements[i])
         verify_list(skip_list)
 
-      list = skip_list.to_list()
+      list = skip_list._to_list()
       assert.equal list.length, elements.length
       assert.equal skip_list.size(), elements.length
       for element, index in elements

@@ -12,7 +12,7 @@
     var verify_list;
     verify_list = function(skip_list) {
       var current, element_to_index, head, index, last, list, node, previous, _i, _j, _len, _len1, _ref, _results;
-      list = skip_list.to_list();
+      list = skip_list._to_list();
       element_to_index = {};
       for (index = _i = 0, _len = list.length; _i < _len; index = ++_i) {
         node = list[index];
@@ -50,7 +50,7 @@
         element = new Element(1);
         skip_list = new SkipList();
         skip_list.insert(element);
-        list = skip_list.to_list();
+        list = skip_list._to_list();
         assert.equal(list.length, 1);
         assert.equal(list.length, skip_list.size());
         assert.equal(list[0].element.compare(element), 0);
@@ -65,7 +65,7 @@
           skip_list.insert(elements[0]);
           verify_list(skip_list);
         }
-        list = skip_list.to_list();
+        list = skip_list._to_list();
         assert.equal(list.length, elements.length);
         assert.equal(skip_list.size(), elements.length);
         _results = [];
@@ -84,7 +84,7 @@
           skip_list.insert(elements[i]);
           verify_list(skip_list);
         }
-        list = skip_list.to_list();
+        list = skip_list._to_list();
         assert.equal(list.length, elements.length);
         assert.equal(skip_list.size(), elements.length);
         _results = [];

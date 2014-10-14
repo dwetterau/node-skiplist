@@ -226,7 +226,7 @@
       }
     };
 
-    SkipList.prototype.to_list = function() {
+    SkipList.prototype._to_list = function() {
       var current, element_list;
       element_list = [];
       current = this._heads[0].next();
@@ -235,6 +235,15 @@
         current = current.next();
       }
       return element_list;
+    };
+
+    SkipList.prototype.to_list = function() {
+      var node, _i, _len, _ref1;
+      _ref1 = this._to_list();
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        node = _ref1[_i];
+        return node.element;
+      }
     };
 
     SkipList.prototype.visualize = function() {

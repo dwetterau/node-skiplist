@@ -209,13 +209,16 @@ class SkipList
         previous = current
         current = previous.next()
 
-  to_list: () ->
+  _to_list: () ->
     element_list = []
     current = @_heads[0].next()
     while current
       element_list.push current
       current = current.next()
     return element_list
+
+  to_list: () ->
+    return node.element for node in @_to_list()
 
   visualize: () ->
     console.log "################~BEGIN~##############"
